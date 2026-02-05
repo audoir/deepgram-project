@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Description
 
-## Getting Started
+This project demonstrates how a customer can migrate their existing support call transcription workflow to a new STT system (Deepgram).
 
-First, run the development server:
+The following is the architecture of the project:
+
+<img src="public/architecture.png" alt="Migration to Deepgram Architecture" width="600">
+
+- First, a new call is recorded, saved to a data store, and the information about the call (such as ID, URL, keyterms, etc.) is sent to the migration router.
+- The migration router routes the call to the existing code, while routing a subset of the calls to the Deepgram STT system.
+- The ID of the call is stored in the submission queue.
+- When a submission worker is available, and is able to submit a call to Deepgram, it picks up the call from the submission queue and submits it to Deepgram.
+- The Deepgram webhook receives the response from Deepgram, stores the response into the database, and creates a new entry in the processing queue.
+- When a processing worker is available, it picks up the call from the processing queue, and processes the call. It can format the response from Deepgram to an existing format for existing integrations (database, transcripts, CRM, etc.)
+
+# Instructions
+
+### Environment Setup
+
+1. Sign up for a tunneling service such as [Ngrok](https://ngrok.com/).
+
+2. Create a `.env` file in the project root with the following variables:
+
+```bash
+DEEPGRAM_API_KEY=your_deepgram_api_key_here
+DEEPGRAM_API_KEY_IDENTIFIER=your_deepgram_api_key_identifier_here
+TUNNEL_URL=your-custom-domain
+```
+
+3. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Start your tunnel (if using Ngrok)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+ngrok http 3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the dashboard.
 
-## Learn More
+### Using the Dashboard
 
-To learn more about Next.js, take a look at the following resources:
+The following is the dashboard page:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<img src="public/dashboard.png" alt="Dashboard" width="600">
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- The New Support Call form allows you to submit a new support call to the migration router. You can specify the audio URL, key terms, and tags.
+- Press the New Support Call button to create a new call in the database and the submission queue.
+- Press the Trigger Submission Worker button to submit the call to Deepgram.
+- You will notice that the status of the call changes to "Transcribing" in the database.
+- When the call is transcribed, the status will be changed to "Processing", and a new entry will be created in the processing queue.
+- Press the Trigger Processing Worker button to process the call.
+- You will notice that the status of the call changes to "Processed" in the database.
+- You can view the response from Deepgram by clicking on the call in the database.
 
-## Deploy on Vercel
+# File Descriptions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Configurations and Types
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/lib/config.ts`: Configurations such as default audio URL, key terms, etc.
+- `src/lib/models.ts`: Types for the database, submission queue, and processing queue.
+
+### Main Components
+
+- `src/app/api/migration-router/route.ts`: Migration router.
+- `src/app/api/dg-submission-worker/route.ts`: Submission worker.
+- `src/app/api/dg-webhook/route.ts`: Deepgram webhook.
+- `src/app/api/dg-processing-worker/route.ts`: Processing worker.
+
+### Mock Components
+
+- `src/lib/database.ts`: Mock database.
+- `src/lib/dg-submission-queue.ts`: Mock submission queue.
+- `src/lib/dg-processing-queue.ts`: Mock processing queue.
+
+### Other Components
+
+- `src/app/page.tsx`: Dashboard UI.
+- `src/app/api/observability/route.ts`: Observability endpoint.
