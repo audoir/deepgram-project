@@ -1,8 +1,17 @@
 # Project Description
 
-This project demonstrates how a customer can migrate their existing support call transcription workflow to a new STT system (Deepgram).
+## Problem Overview
 
-The following is the architecture of the project:
+- Migration strategy from the existing STT system to Deepgram within 60 days
+- System needs to process 10,000 hours of audio per month (~330 hours per day)
+
+- Requirements:
+  - Minimal disruption to existing workflow
+    - Gradual migration with parallel system during transition
+  - Support for industry-specific terminology
+  - Validation methodology to confirm accuracy improvements (improved WER)
+
+## Solution Overview
 
 <img src="public/architecture.png" alt="Migration to Deepgram Architecture" width="600">
 
@@ -10,6 +19,7 @@ The following is the architecture of the project:
 - The migration router routes the call to the existing code, while routing a subset of the calls to the Deepgram STT system.
 - The ID of the call is stored in the submission queue.
 - When a submission worker is available, and is able to submit a call to Deepgram, it picks up the call from the submission queue and submits it to Deepgram.
+- Deepgram processes the call and sends the response to the Deepgram webhook (1 hour of audio takes around 20 seconds to process).
 - The Deepgram webhook receives the response from Deepgram, stores the response into the database, and creates a new entry in the processing queue.
 - When a processing worker is available, it picks up the call from the processing queue, and processes the call. It can format the response from Deepgram to an existing format for existing integrations (database, transcripts, CRM, etc.)
 
@@ -56,6 +66,32 @@ The following is the dashboard page:
 - You will notice that the status of the call changes to "Processed" in the database.
 - You can view the response from Deepgram by clicking on the call in the database.
 
+# Suggested Implementation Timeline
+
+- Phase 1: Infrastructure (Days 1-10)
+  - Clone the `audoir/deepgram-project` repository into local development environment, get that working, and use that as a reference for the implementation
+  - Add migration router functionality to existing system
+  - Set up any infrastructure necessary for parallel system for Deepgram STT
+  - Collect industry specific terminology (key terms), tags, and test dataset
+
+- Phase 2: Implementation and Testing (Days 11-20)
+  - Implement the submission queue, submission worker, webhook, processing queue, and processing worker with basic functionality to process calls through the workflow
+  - Run some test calls through the new system to ensure it works as expected
+
+- Phase 3: Testing and Using Production Data (Days 21-30)
+  - Run tests and compare WER between the old and new systems
+  - Route some production traffic to the new Deepgram STT system using the migration router, and continue implementation where needed
+
+- Phase 4: Enable Parallel Processing for 50% of Production Traffic (Days 31-40)
+  - Add observability to monitor system performance and errors
+  - Run 50% of production traffic to new Deepgram STT system and scale as needed
+
+- Phase 5: Enable Parallel Processing for 100% of Production Traffic (Days 41-50)
+  - Run 100% of production traffic to new Deepgram STT system and scale as needed
+
+- Phase 6: Gradual Rollout from Old System to New System (Days 51-60)
+  - Gradually route traffic from the old system to the new system, using the migration router
+
 # File Descriptions
 
 ### Configurations and Types
@@ -80,3 +116,7 @@ The following is the dashboard page:
 
 - `src/app/page.tsx`: Dashboard UI.
 - `src/app/api/observability/route.ts`: Observability endpoint.
+
+# Deepgram Documentation
+
+You can find the documentation for Deepgram [here](https://developers.deepgram.com/docs/pre-recorded-audio).

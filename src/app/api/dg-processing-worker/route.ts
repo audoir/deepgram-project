@@ -24,8 +24,7 @@ export async function GET(request: NextRequest) {
   // process the transcript
   supportCall.status = "Processed";
   // calculate accuracy against test dataset; word error rate (WER)
-  // can also build eval using other STT systems if no test dataset is available
-  // format deepgram's response to an existing format for existing integrations (database, transcripts, CRM, etc.)
+  // format Deepgram's response to an existing format for existing integrations (database, transcripts, CRM, etc.)
 
   // return the response from deepgram webhook
   return NextResponse.json(
