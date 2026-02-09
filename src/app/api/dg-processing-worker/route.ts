@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNextFromProcessingQueue } from "@/lib/dg-processing-queue";
-import { readDatabase } from "@/lib/database";
+import { getNextFromProcessingQueue } from "@/mock-system/dg-processing-queue";
+import { readDatabase } from "@/mock-system/database";
 
 export async function GET(request: NextRequest) {
   // get next support call id from processing queue
@@ -24,10 +24,8 @@ export async function GET(request: NextRequest) {
   // process the transcript
   supportCall.status = "Processed";
   // calculate accuracy against test dataset; word error rate (WER)
-  // can also build eval using other STT systems if no test dataset is available
-  // format deepgram's response to an existing format for existing integrations (database, transcripts, CRM, etc.)
+  // format Deepgram's response to an existing format for existing integrations (database, transcripts, CRM, etc.)
 
-  // return the response from deepgram webhook
   return NextResponse.json(
     { message: "Support call processed successfully" },
     { status: 200 },

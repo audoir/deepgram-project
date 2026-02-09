@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supportCallDb } from "@/lib/database";
-import { submissionQueue } from "@/lib/dg-submission-queue";
-import { processingQueue } from "@/lib/dg-processing-queue";
+import { supportCallDb } from "@/mock-system/database";
+import { submissionQueue } from "@/mock-system/dg-submission-queue";
+import { processingQueue } from "@/mock-system/dg-processing-queue";
+import { SystemState } from "@/lib/models";
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
+  const systemState: SystemState = {
     supportCallDb,
     submissionQueue,
     processingQueue,
-  });
+  };
+  return NextResponse.json(systemState);
 }

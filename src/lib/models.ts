@@ -21,3 +21,16 @@ export type Database = {
 export type SubmissionQueue = string[];
 
 export type ProcessingQueue = string[];
+
+export interface SystemState {
+  supportCallDb: Database;
+  submissionQueue: SubmissionQueue;
+  processingQueue: ProcessingQueue;
+}
+
+export interface NewSupportCallReq {
+  id: string;
+  url: string;
+  keyterms: string[];
+  tags: string[];
+}

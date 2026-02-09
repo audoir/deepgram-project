@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMatchingRequestId } from "@/lib/database";
-import { addToProcessingQueue } from "@/lib/dg-processing-queue";
+import { getMatchingRequestId } from "@/mock-system/database";
+import { addToProcessingQueue } from "@/mock-system/dg-processing-queue";
 
 export async function POST(request: NextRequest) {
   try {

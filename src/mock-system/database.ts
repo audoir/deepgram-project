@@ -1,5 +1,5 @@
-import { Database, SupportCall } from "./models";
-import { deepgramMaxConcurrentReqs } from "./config";
+import { Database, SupportCall } from "../lib/models";
+import { deepgramMaxConcurrentReqs } from "../lib/config";
 
 export const supportCallDb: Database = {};
 

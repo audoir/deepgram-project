@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-import { getNextFromSubmissionQueue } from "@/lib/dg-submission-queue";
-import { isLessThanMaxConcurrentReqs, readDatabase } from "@/lib/database";
+import { getNextFromSubmissionQueue } from "@/mock-system/dg-submission-queue";
+import { isLessThanMaxConcurrentReqs, readDatabase } from "@/mock-system/database";
 
 export async function GET(request: NextRequest) {
   // check if we are under deepgram max concurrent requests
